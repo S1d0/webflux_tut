@@ -1,6 +1,10 @@
 package com.example.demo.product;
 
+import java.time.Duration;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +33,7 @@ class ProductController {
         return repository.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     Mono<ResponseEntity<Product>> getProduct(@PathVariable String id) {
         return repository.findById(id)
                 .map(product -> ResponseEntity.ok(product))
@@ -64,5 +68,13 @@ class ProductController {
                 Mono.just(ResponseEntity.ok().<Void>build()));
         })
         .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    Flux<ProductEvent> getEvents() {
+        return Flux.interval(Duration.ofSeconds(2))
+        .map(val ->
+         new ProductEvent(UUID.randomUUID().toString()  , "Product Event")
+        );
     }
 }
